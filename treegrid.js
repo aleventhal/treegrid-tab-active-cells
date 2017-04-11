@@ -69,7 +69,6 @@ function onReady(treegrid) {
   // Restore tabIndex to what it should be when focus switches from
   // one treegrid item to another
   function onFocusIn(event) {
-    console.log('onFocusIn');
     var newTreeGridFocus =
       event.target !== window && treegrid.contains(event.target) && event.target;
 
@@ -87,18 +86,13 @@ function onReady(treegrid) {
         oldCurrentRow.tabIndex = -1;
       }
 
-      setTimeout(function() {
-        // The new row
-        var currentRow = getRowWithFocus();
-        console.log('--');
-        console.log(currentRow);
-        if (currentRow) {
-          console.log(currentRow);
-          currentRow.tabIndex = 0;
-          // Items within current row are also tabbable
-          enableTabbingInActiveRowDescendants(true, currentRow);
-        }
-      }, 0);
+      // The new row
+      var currentRow = getRowWithFocus();
+      if (currentRow) {
+        currentRow.tabIndex = 0;
+        // Items within current row are also tabbable
+        enableTabbingInActiveRowDescendants(true, currentRow);
+      }
     }
   }
 
@@ -325,7 +319,8 @@ function onReady(treegrid) {
 
   initTabIndices();
   treegrid.addEventListener('keydown', onKeyDown);
-  window.addEventListener('focusin', onFocusIn);
+  window.addEventListener(window.onfocusin ? 'focusin' : 'focus',
+    onFocusIn, true);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
