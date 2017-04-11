@@ -15,8 +15,8 @@ The main challenge is that the left/right arrow key could be used to collapse/ex
 * Most treegrids don't have that many columns, and are more vertical than horizontal
 * Most users know how to navigate a tree
 * The most important navigation in a treegrid is by row, like in a normal tree
-* Navigation by readonly cells is important for screen reader users -- can be implemented by screen reader (like Ctrl+Alt+Arrow in NVDA+Firefox)
-* Navigation by interactive cell is important for all users -- must be discoverable
+* Navigation by readonly cells is important for screen reader users -- can be implemented by screen reader (like Ctrl+Alt+Arrow in NVDA+Firefox). This is discoverable among screen reader users because they already know table navigation commands. It may require some work on the part of a few screen readers to get this right, but that seems better than relying on web authors to get all their scattered implementations right, on such a complex widget.
+* Navigation by interactive cell is important for all users -- must be discoverable!! Weird keystrokes just won't cut it.
 
 # Approach
 * By default, a user is in row navigation mode. We allow traversal of interactive cells in the currently focused row via tab and shift+tab.
