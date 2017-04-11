@@ -319,6 +319,7 @@ function onReady(treegrid) {
 
   initTabIndices();
   treegrid.addEventListener('keydown', onKeyDown);
+  // Polyfill for focusin necessary for Firefox < 52
   window.addEventListener(window.onfocusin ? 'focusin' : 'focus',
     onFocusIn, true);
 }
