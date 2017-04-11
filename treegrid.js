@@ -89,7 +89,10 @@ function onReady(treegrid) {
       setTimeout(function() {
         // The new row
         var currentRow = getRowWithFocus();
+        console.log('--');
+        console.log(currentRow);
         if (currentRow) {
+          console.log(currentRow);
           currentRow.tabIndex = 0;
           // Items within current row are also tabbable
           enableTabbingInActiveRowDescendants(true, currentRow);
