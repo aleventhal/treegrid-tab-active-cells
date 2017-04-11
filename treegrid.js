@@ -86,13 +86,15 @@ function onReady(treegrid) {
         oldCurrentRow.tabIndex = -1;
       }
 
-      // The new row
-      var currentRow = getRowWithFocus();
-      if (currentRow) {
-        currentRow.tabIndex = 0;
-        // Items within current row are also tabbable
-        enableTabbingInActiveRowDescendants(true, currentRow);
-      }
+      setTimeout(function() {
+        // The new row
+        var currentRow = getRowWithFocus();
+        if (currentRow) {
+          currentRow.tabIndex = 0;
+          // Items within current row are also tabbable
+          enableTabbingInActiveRowDescendants(true, currentRow);
+        }
+      }, 0);
     }
   }
 
