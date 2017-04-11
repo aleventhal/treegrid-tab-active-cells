@@ -69,6 +69,7 @@ function onReady(treegrid) {
   // Restore tabIndex to what it should be when focus switches from
   // one treegrid item to another
   function onFocusIn(event) {
+    console.log('onFocusIn');
     var newTreeGridFocus =
       event.target !== window && treegrid.contains(event.target) && event.target;
 
