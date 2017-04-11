@@ -72,7 +72,7 @@ function onReady(treegrid) {
     var newTreeGridFocus =
       event.target !== window && treegrid.contains(event.target) && event.target;
 
-    // The last row we considered
+    // The last row we considered focused
     var oldCurrentRow = enableTabbingInActiveRowDescendants.tabbingRow;
     if (oldCurrentRow) {
       enableTabbingInActiveRowDescendants(false, oldCurrentRow);
