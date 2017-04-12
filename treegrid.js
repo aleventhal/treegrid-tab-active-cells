@@ -236,7 +236,6 @@ function onReady (treegrid) {
     var currentLevel = getLevel(currentRow);
     var rows = getAllRows();
     var currentRowIndex = rows.indexOf(currentRow);
-    console.assert(currentRowIndex >= 0);
     var didChange;
     var doExpandLevel = [];
     doExpandLevel[currentLevel + 1] = doExpand;
