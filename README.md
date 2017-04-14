@@ -12,42 +12,6 @@ The main challenge is that the left/right arrow key could be used to collapse/ex
 
 * Ideally, screen readers would implement table navigation keys even in focus mode, launching from the current row or cell. NVDA does this in Firefox via Ctrl+Alt+Arrow, recognizing the current row as a starting position.
 
-# Keyboard specifics
-<table>
-<thead>
-<tr>
-<th>Keys</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-  <tr>
-    <td>Up/down</td>
-    <td>Move by row as in an ordinary tree. If focused on a cell, will move
-    to the same cell in the newly focused row</td>
-  </tr>
-  <tr>
-    <td>Left/right</td>
-    <td>Collapse/expand as in an ordinary tree. If the row is already expanded, right arrow will focus the first cell. If focused on a non-editable cell, will navigate to an adjacent cell.</td>
-  </tr>
-  <tr>
-    <td>Home/end</td>
-    <td>Move to first/last row or cell, depending on whether user currently focused on a row or cell.</td>
-  </tr>
-  <tr>
-    <td>Tab/shift+tab</td>
-    <td>If there are focusable items in the currently active row,
-        will navigate between them, otherwise navigates out of the treegrid</td>
-  </tr>
-  <tr>
-    <td>Spacebar</td>
-    <td>In a multiselectable treegrid, will toggle checkbox at start of row
-    that corresponds to selecting the current row</td>
-  </tr>
-</tbody>
-</table>
-
-
 # Markup considerations
 * roles used are treegrid, row and gridcell
 * aria-level: used to set the current level of an item, 1, 2, 3, etc.
