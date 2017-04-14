@@ -77,6 +77,11 @@ function onReady (treegrid) {
     if (oldCurrentRow) {
       enableTabbingInActiveRowDescendants(false, oldCurrentRow);
     }
+    if (onFocusIn.prevTreeGridFocus
+      && onFocusIn.prevTreeGridFocus.localName === 'td') {
+      // Was focused on td, remove tabIndex so that it's not focused on click
+      onFocusIn.prevTreeGridFocus.removeAttribute('tabindex');
+    }
 
     if (newTreeGridFocus) {
       // Stayed in treegrid
@@ -94,6 +99,8 @@ function onReady (treegrid) {
         enableTabbingInActiveRowDescendants(true, currentRow);
       }
     }
+
+    onFocusIn.prevTreeGridFocus = newTreeGridFocus;
   }
 
   // Set whether interactive elements within a row are tabbable
