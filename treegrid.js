@@ -1,9 +1,5 @@
 // TODO put aria-readme everywhere
 function onReady (treegrid) {
-  function isChecked (id) {
-    return document.getElementById(id).checked;
-  }
-
   function initTabIndices () {
     // Make sure focusable elements are not in the tab order
     // They will be added back in for the active row
