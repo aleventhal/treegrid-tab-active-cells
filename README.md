@@ -92,5 +92,3 @@ The main challenge is that the left/right arrow key could be used to collapse/ex
 </tr>
 </tbody>
 </table>
-
-
