@@ -254,7 +254,9 @@ function onReady (treegrid) {
   function moveToExtremeRow (direction) {
     var rows = getAllNavigableRows();
     var newRow = rows[direction > 0 ? rows.length - 1 : 0];
-    focus(newRow);
+    if (!focusSameColInDifferentRow(getRowWithFocus(), newRow)) {
+      focus(newRow);
+    }
   }
 
   function changeExpanded (doExpand) {
@@ -295,22 +297,28 @@ function onReady (treegrid) {
   }
 
   function onKeyDown (event) {
-    function isModifierPressed () {
-      return event.ctrlKey || event.altKey || event.shiftKey || event.metaKey;
-    }
-
     var UP = 38;
     var DOWN = 40;
     var LEFT = 37;
     var RIGHT = 39;
     var HOME = 36;
     var END = 35;
+    var CTRL_HOME = -HOME;
+    var CTRL_END = -END;
 
-    if (isModifierPressed(event)) {
+    var numModifiersPressed = event.ctrlKey + event.altKey + event.shiftKey +
+      event.metaKey;
+
+    var key = event.keyCode;
+
+    if (numModifiersPressed === 1 && event.ctrlKey) {
+      key = -key; // Treat as negative key value when ctrl pressed
+    }
+    else if (numModifiersPressed) {
       return;
     }
 
-    switch (event.keyCode) {
+    switch (key) {
       case DOWN:
         moveByRow(1);
         break;
@@ -339,11 +347,17 @@ function onReady (treegrid) {
           moveByCol(1);
         }
         break;
+      case CTRL_HOME:
+        moveToExtremeRow(-1);
+        break;
       case HOME:
         if (isEditableFocused()) {
           return;  // Leave key for editable area
         }
         moveToExtreme(-1);
+        break;
+      case CTRL_END:
+        moveToExtremeRow(1);
         break;
       case END:
         if (isEditableFocused()) {
