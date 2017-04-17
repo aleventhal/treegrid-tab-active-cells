@@ -1,6 +1,10 @@
 # ARIA treegrid example
 
-[Jump to interactive version](https://cdn.rawgit.com/aleventhal/master/0.1.10/treegrid.html)
+<<<<<<< HEAD
+[Jump to interactive version](https://cdn.rawgit.com/aleventhal/treegrid-tab-active-cells/0.1.9/treegrid.html)
+=======
+[Jump to interactive version](https://cdn.rawgit.com/aleventhal/treegrid-tab-active-cells/0.1.10/treegrid.html)
+>>>>>>> right-on-expanded-focuses-cell
 
 # Rationale
 

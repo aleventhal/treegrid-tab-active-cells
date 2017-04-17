@@ -1,13 +1,5 @@
 // TODO put aria-readme everywhere
 function onReady (treegrid) {
-  function isChecked (id) {
-    return document.getElementById(id).checked;
-  }
-
-  function shouldKeepColAfterRowNav () {
-    return isChecked('keepColAfterRowNav');
-  }
-
   function initTabIndices () {
     // Make sure focusable elements are not in the tab order
     // They will be added back in for the active row
@@ -31,7 +23,8 @@ function onReady (treegrid) {
   function getFocusableElems (root) {
     // textarea not supported as a cell widget as it's multiple lines
     // and needs up/down keys
-    var nodeList = root.querySelectorAll('a,button,input,[tabindex]');
+    // These should all be descendants of a cell
+    var nodeList = root.querySelectorAll('a,button,input,td>[tabindex]');
     return Array.prototype.slice.call(nodeList);
   }
 
@@ -62,8 +55,15 @@ function onReady (treegrid) {
   }
 
   function focus (elem) {
-    elem.tabIndex = 0; // Ensure focusable
+    elem.tabIndex = -1; // Ensure focusable
     elem.focus();
+  }
+
+  function focusCell (cell) {
+    // Check for focusable child such as link or textbox
+    // and use that if available
+    var focusableChildren = getFocusableElems(cell);
+    focus(focusableChildren[0] || cell);
   }
 
   // Restore tabIndex to what it should be when focus switches from
@@ -76,6 +76,11 @@ function onReady (treegrid) {
     var oldCurrentRow = enableTabbingInActiveRowDescendants.tabbingRow;
     if (oldCurrentRow) {
       enableTabbingInActiveRowDescendants(false, oldCurrentRow);
+    }
+    if (onFocusIn.prevTreeGridFocus
+      && onFocusIn.prevTreeGridFocus.localName === 'td') {
+      // Was focused on td, remove tabIndex so that it's not focused on click
+      onFocusIn.prevTreeGridFocus.removeAttribute('tabindex');
     }
 
     if (newTreeGridFocus) {
@@ -94,6 +99,8 @@ function onReady (treegrid) {
         enableTabbingInActiveRowDescendants(true, currentRow);
       }
     }
+
+    onFocusIn.prevTreeGridFocus = newTreeGridFocus;
   }
 
   // Set whether interactive elements within a row are tabbable
@@ -127,6 +134,12 @@ function onReady (treegrid) {
 
   function isRowFocused () {
     return getRowWithFocus() === document.activeElement;
+  }
+
+  // Note: contenteditable not currently supported
+  function isEditableFocused () {
+    var focusedElem = document.activeElement;
+    return focusedElem.localName === 'input';
   }
 
   function getColWithFocus (currentRow) {
@@ -170,8 +183,7 @@ function onReady (treegrid) {
     }
     while (requiredLevel && requiredLevel !== getLevel(rows[rowIndex]));
 
-    if (!shouldKeepColAfterRowNav()
-      || !focusSameColInDifferentRow(currentRow, rows[rowIndex])) {
+    if (!focusSameColInDifferentRow(currentRow, rows[rowIndex])) {
       focus(rows[rowIndex]);
     }
   }
@@ -192,7 +204,7 @@ function onReady (treegrid) {
 
     var toCols = getNavigableCols(toRow);
     // Focus the first focusable element inside the <td>
-    focus(toCols[currentColIndex].querySelector('[tabindex]'));
+    focusCell(toCols[currentColIndex]);
     return true;
   }
 
@@ -211,15 +223,32 @@ function onReady (treegrid) {
     }
   }
 
+  function moveByCol (direction) {
+    var currentRow = getRowWithFocus();
+    if (!currentRow) {
+      return;
+    }
+    var cols = getNavigableCols(currentRow);
+    var numCols = cols.length;
+    var currentCol = getColWithFocus(currentRow);
+    var currentColIndex = cols.indexOf(currentCol);
+    // First right arrow moves to first column
+    var newColIndex = (currentCol || direction < 0) ? currentColIndex
+      + direction : 0;
+    // Moving past beginning focuses row
+    if (newColIndex < 0) {
+      focus(currentRow);
+      return;
+    }
+    newColIndex = restrictIndex(newColIndex, numCols);
+    focusCell(cols[newColIndex]);
+  }
+
   function moveToExtremeCol (direction, currentRow) {
     // Move to first/last col
     var cols = getNavigableCols(currentRow);
-    if (direction === -1) {
-      focus(cols[0]);
-    }
-    else {
-      focus(cols[cols.length - 1]);
-    }
+    var desiredColIndex = direction < 0 ? 0 : cols.length - 1;
+    focusCell(cols[desiredColIndex]);
   }
 
   function moveToExtremeRow (direction) {
@@ -289,26 +318,36 @@ function onReady (treegrid) {
         moveByRow(-1);
         break;
       case LEFT:
-        if (!isRowFocused()) {
-          return;
+        if (isEditableFocused()) {
+          return;  // Leave key for editable area
         }
-        changeExpanded(false) || moveByRow(-1, true);
+        if (isRowFocused()) {
+          changeExpanded(false) || moveByRow(-1, true);
+        }
+        else {
+          moveByCol(-1);
+        }
         break;
       case RIGHT:
-        if (!isRowFocused()) {
-          return;
+        if (isEditableFocused()) {
+          return;  // Leave key for editable area
         }
-        changeExpanded(true) || moveByRow(1, true);
+
+        // If row: try to expand
+        // If col or can't expand, move column to right
+        if (!isRowFocused() || !changeExpanded(true)) {
+          moveByCol(1);
+        }
         break;
       case HOME:
-        if (!isRowFocused()) {
-          return;
+        if (isEditableFocused()) {
+          return;  // Leave key for editable area
         }
         moveToExtreme(-1);
         break;
       case END:
-        if (!isRowFocused()) {
-          return;
+        if (isEditableFocused()) {
+          return;  // Leave key for editable area
         }
         moveToExtreme(1);
         break;
