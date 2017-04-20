@@ -1,5 +1,4 @@
-// TODO put aria-readme everywhere
-function onReady (treegrid) {
+function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
   function initTabIndices () {
     // Make sure focusable elements are not in the tab order
     // They will be added back in for the active row
@@ -10,14 +9,27 @@ function onReady (treegrid) {
     // does not work in IE
     var rows = getAllRows();
     var index = rows.length;
-    while (index--) {
-      rows[index].tabIndex = index ? -1 : 0;
+    var startRowIndex = doStartRowFocus ? 0 : -1;
+
+    if (doAllowRowFocus) {
+      while (index--) {
+        rows[index].tabIndex = index === startRowIndex ? 0 : -1;
+      }
     }
+
+    if (doStartRowFocus) {
+      return;
+    }
+
+    // Start with cell focus
+    var firstCell = getNavigableCols(rows[0])[0];
+    var focusable = getFocusableElems(firstCell)[0] || firstCell;
+    focusable.tabIndex = 0;
   }
 
   function getAllRows () {
     var nodeList = treegrid.querySelectorAll('tbody > tr');
-    return Array.prototype.slice.call(nodeList);
+    return Array.prototype.slice.call(nodeList);a
   }
 
   function getFocusableElems (root) {
@@ -37,7 +49,7 @@ function onReady (treegrid) {
   }
 
   function getAllNavigableRows () {
-    var nodeList = treegrid.querySelectorAll('tbody > tr[tabindex]:not([aria-hidden="true"])');
+    var nodeList = treegrid.querySelectorAll('tbody > tr:not([aria-hidden="true"])');
     // Convert to array so that we can use array methods on it
     return Array.prototype.slice.call(nodeList);
   }
@@ -77,7 +89,7 @@ function onReady (treegrid) {
     if (oldCurrentRow) {
       enableTabbingInActiveRowDescendants(false, oldCurrentRow);
     }
-    if (onFocusIn.prevTreeGridFocus
+    if (doAllowRowFocus && onFocusIn.prevTreeGridFocus
       && onFocusIn.prevTreeGridFocus.localName === 'td') {
       // Was focused on td, remove tabIndex so that it's not focused on click
       onFocusIn.prevTreeGridFocus.removeAttribute('tabindex');
@@ -189,7 +201,6 @@ function onReady (treegrid) {
   }
 
   function focusSameColInDifferentRow (fromRow, toRow) {
-
     var currentCol = getColWithFocus(fromRow);
     if (!currentCol) {
       return;
@@ -236,7 +247,7 @@ function onReady (treegrid) {
     var newColIndex = (currentCol || direction < 0) ? currentColIndex
       + direction : 0;
     // Moving past beginning focuses row
-    if (newColIndex < 0) {
+    if (doAllowRowFocus && newColIndex < 0) {
       focus(currentRow);
       return;
     }
@@ -406,7 +417,27 @@ function onReady (treegrid) {
     onFocusIn, true);
 }
 
+// Get an object where each field represents a URL parameter
+// e.g. { tab: 33 }
+function getQuery () {
+  if (!getQuery.cached) {
+    getQuery.cached = {};
+    const queryStr = window.location.search.substring(1);
+    const vars = queryStr.split('&');
+    for (let i = 0; i<vars.length; i++) {
+      const pair = vars[i].split('=');
+      // If first entry with this name
+      getQuery.cached[pair[0]] = pair[1] && decodeURIComponent(pair[1]);
+    }
+  }
+  return getQuery.cached;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-  onReady(document.getElementById('treegrid'));
+  // Supports url parameter ?cell=force or ?cell=start (or leave out parameter)
+  var cellParam = getQuery().cell;
+  var doAllowRowFocus = cellParam !== 'force';
+  var doStartRowFocus = doAllowRowFocus && cellParam !== 'start';
+  onReady(document.getElementById('treegrid'), doAllowRowFocus, doStartRowFocus);
 });
 
