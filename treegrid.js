@@ -1,5 +1,5 @@
 function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
-  function initTabIndices () {
+  function initAttributes () {
     // Make sure focusable elements are not in the tab order
     // They will be added back in for the active row
     setTabIndexOfFocusableElems(treegrid, -1);
@@ -11,10 +11,14 @@ function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
     var index = rows.length;
     var startRowIndex = doStartRowFocus ? 0 : -1;
 
-    if (doAllowRowFocus) {
-      while (index--) {
+    while (index--) {
+      if (doAllowRowFocus) {
         rows[index].tabIndex = index === startRowIndex ? 0 : -1;
       }
+      else {
+        setTabIndexForCellsInRow(rows[index], -1);
+      }
+      propagateExpandedToFirstCell(rows[index]);
     }
 
     if (doStartRowFocus) {
@@ -23,13 +27,25 @@ function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
 
     // Start with cell focus
     var firstCell = getNavigableCols(rows[0])[0];
-    var focusable = getFocusableElems(firstCell)[0] || firstCell;
-    focusable.tabIndex = 0;
+    setTabIndexForCell(firstCell);
+  }
+
+  function setTabIndexForCell(cell, tabIndex) {
+    var focusable = getFocusableElems(cell)[0] || cell;
+    focusable.tabIndex = tabIndex;
+  }
+
+  function setTabIndexForCellsInRow(row, tabIndex) {
+    var cells = getNavigableCols(row);
+    var cellIndex = cells.length;
+    while (cellIndex --) {
+      setTabIndexForCell(cells[cellIndex], tabIndex);
+    }
   }
 
   function getAllRows () {
     var nodeList = treegrid.querySelectorAll('tbody > tr');
-    return Array.prototype.slice.call(nodeList);a
+    return Array.prototype.slice.call(nodeList);
   }
 
   function getFocusableElems (root) {
@@ -325,7 +341,22 @@ function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
     }
     if (didChange) {
       currentRow.setAttribute('aria-expanded', doExpand);
+      propagateExpandedToFirstCell(currentRow);
       return true;
+    }
+  }
+
+  // Mirror aria-expanded from the row to the first cell in that row
+  // (TBD is this a good idea? How else will screen reader user hear
+  // that the cell represents the opportunity to collapse/expand rows?)
+  function propagateExpandedToFirstCell (row) {
+    var expandedValue = row.getAttribute('aria-expanded');
+    var firstCell = getNavigableCols(row)[0];
+    if (expandedValue) {
+      firstCell.setAttribute('aria-expanded', expandedValue);
+    }
+    else {
+      firstCell.removeAttribute('aria-expanded');
     }
   }
 
@@ -410,7 +441,7 @@ function onReady (treegrid, doAllowRowFocus, doStartRowFocus) {
     event.preventDefault();
   }
 
-  initTabIndices();
+  initAttributes();
   treegrid.addEventListener('keydown', onKeyDown);
   // Polyfill for focusin necessary for Firefox < 52
   window.addEventListener(window.onfocusin ? 'focusin' : 'focus',
