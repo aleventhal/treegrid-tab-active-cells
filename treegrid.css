@@ -10,6 +10,7 @@ h1 {
 #key-info {
   border-spacing: 0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 #key-info td, #key-info th {
   border: 1px solid #aaa;
